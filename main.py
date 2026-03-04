@@ -149,40 +149,52 @@ def process_and_post():
     affiliate_link, history = result
     print(f"Processing Link: {affiliate_link}")
     
-    # 50+ list mein se koi ek random User-Agent select karna
     random_user_agent = random.choice(USER_AGENTS)
     headers = {
         "User-Agent": random_user_agent,
         "Accept-Language": "en-US,en;q=0.9",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Referer": "https://www.google.com/" # Google ka referer dene se Amazon ko lagta hai user search karke aaya hai
     }
     
     try:
-        response = requests.get(affiliate_link, headers=headers, allow_redirects=True, timeout=15)
+        # Session ka use karna normal requests se zyada safe hota hai
+        session = requests.Session()
+        response = session.get(affiliate_link, headers=headers, allow_redirects=True, timeout=15)
         soup = BeautifulSoup(response.content, "html.parser")
         
-        # Raw Title aur Image nikalna
-        raw_title = soup.find("span", {"id": "productTitle"}).get_text(strip=True)
-        image_url = soup.find("img", {"id": "landingImage"})['src']
+        # 1. SAFE EXTRACTION: Pehle check karein ki Title mila ya nahi
+        title_element = soup.find("span", {"id": "productTitle"})
         
-        # Description (Feature Bullets) nikalna
+        if title_element is None:
+            print("❌ Scraping failed! Amazon ne asli page ki jagah CAPTCHA de diya hai.")
+            print("Action: Yeh link skip kar rahe hain, code crash nahi hoga. Next time retry hoga.")
+            return # Script yahin ruk jayegi aur crash nahi hogi
+            
+        raw_title = title_element.get_text(strip=True)
+        
+        # Image extract karna
+        image_element = soup.find("img", {"id": "landingImage"})
+        image_url = image_element['src'] if image_element else ""
+        
+        # Description extract karna
         bullets = soup.find("div", {"id": "feature-bullets"})
         description = ""
         if bullets:
             list_items = bullets.find_all("li")
             description = " ".join([li.get_text(strip=True) for li in list_items])
             
-        # Pollinations AI se Title Short Karna
+        # AI Title
         final_title = shorten_title_with_pollinations(raw_title)
 
     except Exception as e:
-        print(f"Scraping failed (Blocked ya Page load nahi hua). Error: {e}")
+        print(f"Scraping request failed. Error: {e}")
         return
 
     # 1. Telegram par bhejna
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
         telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
-        # Final AI Title use kiya hai caption mein
         caption = f"🔥 **{final_title}**\n\n✨ {description[:120]}...\n\n🛒 **Buy Here:** {affiliate_link}"
         payload = {"chat_id": TELEGRAM_CHAT_ID, "photo": image_url, "caption": caption, "parse_mode": "Markdown"}
         t_res = requests.post(telegram_api_url, data=payload)
@@ -194,7 +206,7 @@ def process_and_post():
     # 2. Webhook par bhejna
     if WEBHOOK_URL:
         webhook_payload = {
-            "title": final_title, # Yahan bhi short title
+            "title": final_title,
             "description": description[:300],
             "image_url": image_url,
             "affiliate_link": affiliate_link
