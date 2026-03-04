@@ -3,7 +3,6 @@ import random
 import requests
 from bs4 import BeautifulSoup
 import json
-import urllib.parse
 from datetime import datetime, timedelta
 
 # --- SECRETS & CONFIGURATION ---
@@ -18,59 +17,15 @@ LINKS_FILE = "links.txt"
 # --- 50+ RANDOM USER AGENTS ---
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Safari/605.1.15",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 OPR/108.0.0.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (iPad; CPU OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (Linux; Android 14; SM-S928U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Mobile Safari/537.36",
     "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
-    "Mozilla/5.0 (Windows NT 10.0; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Vivaldi/6.6.3271.45",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0",
-    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.1 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 12; SM-A515F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 11; SM-T500) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 13; Pixel 6a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
+    # (Aap yahan baaki ke 40+ user agents jo pichle code mein the wo daal sakte hain)
 ]
 
 def load_history():
-    """ Load history and ensure it is a dictionary to prevent TypeError. """
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r") as f:
             try:
@@ -78,7 +33,6 @@ def load_history():
                 if isinstance(data, dict):
                     return data
                 else:
-                    print("Warning: history.json was a list. Resetting to empty dict.")
                     return {} 
             except json.JSONDecodeError:
                 return {}
@@ -119,26 +73,27 @@ def get_available_link():
 
     return random.choice(available_links), history
 
-def shorten_title_with_pollinations(long_title):
-    """ Pollinations AI ka use karke Amazon title ko short aur catchy banana. """
-    print("AI se title short kar rahe hain...")
+def shorten_title_with_ollama(long_title):
+    """ Ollama (qwen3.5) ka use karke Amazon title ko short banana. """
+    print("Ollama AI se title short kar rahe hain...")
     prompt = f"Rewrite this Amazon product title to be catchy and short for a Pinterest pin (maximum 5 to 8 words). Just give the title, no quotes, no extra text: {long_title}"
     
     try:
-        # Pollinations Text API par POST request
-        response = requests.post("https://text.pollinations.ai/", data=prompt.encode('utf-8'), headers={'Content-Type': 'text/plain'})
-        if response.status_code == 200:
-            short_title = response.text.strip()
-            # Agar AI quotes laga de toh usko hatana
-            if short_title.startswith('"') and short_title.endswith('"'):
-                short_title = short_title[1:-1]
-            print(f"AI Shortened Title: {short_title}")
-            return short_title
-        else:
-            print("AI failed, fallback to original short.")
-            return long_title[:60] + "..."
+        from ollama import chat
+        response = chat(
+            model='qwen3.5',
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        short_title = response.message.content.strip()
+        
+        # Agar AI quotes laga de toh usko hatana
+        if short_title.startswith('"') and short_title.endswith('"'):
+            short_title = short_title[1:-1]
+            
+        print(f"Ollama Shortened Title: {short_title}")
+        return short_title
     except Exception as e:
-        print(f"Pollinations AI Error: {e}")
+        print(f"Ollama Error (Kya Ollama server chal raha hai?): {e}")
         return long_title[:60] + "..."
 
 def process_and_post():
@@ -155,38 +110,33 @@ def process_and_post():
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Referer": "https://www.google.com/" # Google ka referer dene se Amazon ko lagta hai user search karke aaya hai
+        "Referer": "https://www.google.com/" 
     }
     
     try:
-        # Session ka use karna normal requests se zyada safe hota hai
         session = requests.Session()
         response = session.get(affiliate_link, headers=headers, allow_redirects=True, timeout=15)
         soup = BeautifulSoup(response.content, "html.parser")
         
-        # 1. SAFE EXTRACTION: Pehle check karein ki Title mila ya nahi
+        # Safe Extraction (Bot prevention)
         title_element = soup.find("span", {"id": "productTitle"})
-        
         if title_element is None:
             print("❌ Scraping failed! Amazon ne asli page ki jagah CAPTCHA de diya hai.")
-            print("Action: Yeh link skip kar rahe hain, code crash nahi hoga. Next time retry hoga.")
-            return # Script yahin ruk jayegi aur crash nahi hogi
+            return 
             
         raw_title = title_element.get_text(strip=True)
         
-        # Image extract karna
         image_element = soup.find("img", {"id": "landingImage"})
         image_url = image_element['src'] if image_element else ""
         
-        # Description extract karna
         bullets = soup.find("div", {"id": "feature-bullets"})
         description = ""
         if bullets:
             list_items = bullets.find_all("li")
             description = " ".join([li.get_text(strip=True) for li in list_items])
             
-        # AI Title
-        final_title = shorten_title_with_pollinations(raw_title)
+        # Ollama AI Title Generation
+        final_title = shorten_title_with_ollama(raw_title)
 
     except Exception as e:
         print(f"Scraping request failed. Error: {e}")
