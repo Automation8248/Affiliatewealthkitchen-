@@ -14,16 +14,11 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 COOLDOWN_DAYS = 5
 HISTORY_FILE = "history.json"
 LINKS_FILE = "links.txt"
-TEMP_IMAGE_FILE = "temp_image.jpg" # Image download karne ke liye temporary file
+TEMP_IMAGE_FILE = "temp_image.jpg"
 
-# --- UNIVERSAL KITCHEN TITLES ---
-KITCHEN_TITLES = [
-    "Upgrade Your Kitchen with This Smart Gadget! 🍳",
-    "A Must-Have Essential for Every Modern Kitchen! ✨",
-    "Make Cooking Easier and Faster Today! 👩‍🍳",
-    "The Secret to a Perfectly Organized Kitchen! 🏠",
-    "Say Goodbye to Kitchen Mess with This Handy Tool! 🧼"
-]
+# --- NEW: FILE NAMES FOR TITLES AND TAGS ---
+TITLES_FILE = "titles.txt"
+TAGS_FILE = "tags.txt"
 
 # --- 50+ RANDOM USER AGENTS ---
 USER_AGENTS = [
@@ -80,7 +75,6 @@ USER_AGENTS = [
 ]
 
 def load_history():
-    """ Load history and ensure it is a dictionary to prevent TypeError. """
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r") as f:
             try:
@@ -88,7 +82,6 @@ def load_history():
                 if isinstance(data, dict):
                     return data
                 else:
-                    print("Warning: history.json was a list. Resetting to empty dict.")
                     return {} 
             except json.JSONDecodeError:
                 return {}
@@ -129,6 +122,36 @@ def get_available_link():
 
     return random.choice(available_links), history
 
+# --- NEW HELPER FUNCTIONS FOR TITLES AND TAGS ---
+def get_random_title():
+    if not os.path.exists(TITLES_FILE):
+        return "Check Out This Awesome Product! 🔥" # Fallback agar file na ho
+    
+    with open(TITLES_FILE, "r", encoding="utf-8") as f:
+        titles = [line.strip() for line in f.readlines() if line.strip()]
+        
+    if not titles:
+        return "Check Out This Awesome Product! 🔥"
+        
+    return random.choice(titles)
+
+def get_random_tags(count=9):
+    if not os.path.exists(TAGS_FILE):
+        return "" # Fallback agar file na ho
+        
+    with open(TAGS_FILE, "r", encoding="utf-8") as f:
+        # Har tag ke aage se '#' hata kar clean karna, taki duplicate '#' na lag jaye
+        tags = [line.strip().replace("#", "") for line in f.readlines() if line.strip()]
+        
+    if not tags:
+        return ""
+        
+    # Sirf required number of tags uthana (maximum 9)
+    selected_tags = random.sample(tags, min(count, len(tags)))
+    
+    # Unhe '#' ke sath ek string mein join karna
+    return " ".join([f"#{tag}" for tag in selected_tags])
+
 def process_and_post():
     result = get_available_link()
     if not result:
@@ -151,7 +174,7 @@ def process_and_post():
         response = session.get(affiliate_link, headers=headers, allow_redirects=True, timeout=15)
         soup = BeautifulSoup(response.content, "html.parser")
         
-        # 1. SAFE EXTRACTION: Pehle check karein ki Title mila ya nahi
+        # 1. SAFE EXTRACTION
         title_element = soup.find("span", {"id": "productTitle"})
         
         if title_element is None:
@@ -190,16 +213,18 @@ def process_and_post():
         else:
             short_description = description
 
-        # Random Title Logic
-        final_title = random.choice(KITCHEN_TITLES)
+        # --- GET RANDOM TITLE & TAGS FROM FILES ---
+        final_title = get_random_title()
+        final_tags = get_random_tags(count=9)
 
     except Exception as e:
         print(f"Scraping request failed. Error: {e}")
         return
 
-    # 1. Telegram par bhejna (Photo File ke sath)
+    # 1. Telegram par bhejna (Tags ke sath)
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-        caption = f"🔥 **{final_title}**\n\n✨ {short_description}\n\n🛒 **Buy Here:** {affiliate_link}"
+        # Caption mein title, description, link aur end mein tags
+        caption = f"🔥 **{final_title}**\n\n✨ {short_description}\n\n🛒 **Buy Here:** {affiliate_link}\n\n{final_tags}"
         
         if image_downloaded:
             telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
@@ -208,7 +233,6 @@ def process_and_post():
                 files = {"photo": photo}
                 t_res = requests.post(telegram_api_url, data=payload, files=files)
         else:
-            # Agar image download nahi hui to sirf text bhej do
             telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
             payload = {"chat_id": TELEGRAM_CHAT_ID, "text": caption, "parse_mode": "Markdown"}
             t_res = requests.post(telegram_api_url, data=payload)
@@ -218,17 +242,19 @@ def process_and_post():
         else:
             print(f"❌ Telegram Error: {t_res.text}")
 
-    # 2. Webhook par bhejna (File form-data ke roop me)
+    # 2. Webhook par bhejna
     if WEBHOOK_URL:
+        # Webhook ke data me bhi tags add kar diye gaye hain
         webhook_data = {
             "title": final_title,
             "description": short_description,
-            "affiliate_link": affiliate_link
+            "affiliate_link": affiliate_link,
+            "tags": final_tags
         }
         
         if image_downloaded:
             with open(TEMP_IMAGE_FILE, 'rb') as image_file:
-                files = {"image": image_file} # "image" key se file jayegi
+                files = {"image": image_file} 
                 w_res = requests.post(WEBHOOK_URL, data=webhook_data, files=files)
         else:
             w_res = requests.post(WEBHOOK_URL, data=webhook_data)
@@ -238,12 +264,12 @@ def process_and_post():
         else:
             print(f"❌ Webhook Error: {w_res.status_code}")
 
-    # 3. Post successful hone ke baad History Update karna
+    # 3. History Update
     history[affiliate_link] = datetime.now().isoformat()
     save_history(history)
     print("✅ History update ho gayi!")
     
-    # 4. Clean Up Temporary Image
+    # 4. Clean Up
     if os.path.exists(TEMP_IMAGE_FILE):
         os.remove(TEMP_IMAGE_FILE)
         print("🧹 Temporary image deleted.")
