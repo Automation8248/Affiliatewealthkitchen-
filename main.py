@@ -165,6 +165,10 @@ def process_and_post():
     print(f"Processing Link: {affiliate_link}")
     random_user_agent = random.choice(USER_AGENTS)
     
+    # Global variables for try/except block
+    image_url = ""
+    description = ""
+    
     # --- START REAL BROWSER (PLAYWRIGHT) ---
     with sync_playwright() as p:
         print("Asli browser open kar rahe hain...")
@@ -177,18 +181,26 @@ def process_and_post():
         
         try:
             page.goto(affiliate_link, timeout=45000)
-            print("Page par pohoch gaye, insaan ki tarah wait kar rahe hain...")
-            time.sleep(random.uniform(2.0, 5.0))
+            
+            # --- 1. NEW LOGIC: 5 SE 7 SECOND WAIT ---
+            print("Page par pohoch gaye, insaan ki tarah 5 se 7 second wait kar rahe hain...")
+            time.sleep(random.uniform(5.0, 7.0)) 
             
             page.screenshot(path="screenshot_1_loaded.png")
             print("📸 Screenshot liya: Page Load.")
 
+            # Mouse hilaana
             page.mouse.move(random.randint(100, 500), random.randint(100, 500))
             time.sleep(random.uniform(0.5, 1.5))
             
+            # --- 2. NEW LOGIC: NICHE AUR UPAR SCROLL KAREGA ---
             print("Niche scroll kar rahe hain...")
-            page.mouse.wheel(0, random.randint(400, 1000))
-            time.sleep(random.uniform(1.0, 3.0))
+            page.mouse.wheel(0, random.randint(600, 1000)) # Niche ki taraf
+            time.sleep(random.uniform(2.0, 3.0))
+            
+            print("Wapas upar scroll kar rahe hain...")
+            page.mouse.wheel(0, -random.randint(300, 600)) # Upar ki taraf (negative value)
+            time.sleep(random.uniform(1.0, 2.0))
             
             page.screenshot(path="screenshot_2_scrolled.png")
             print("📸 Screenshot liya: Scroll karne ke baad.")
@@ -199,15 +211,26 @@ def process_and_post():
                 browser.close()
                 return
             
-            image_url = ""
-            img_locator = page.locator("#landingImage")
-            if img_locator.count() > 0:
-                image_url = img_locator.get_attribute("src")
+            # --- EXTRACT DATA (IMAGE AUR DESCRIPTION) ---
+            print("🔍 Image aur Description dhoondh rahe hain...")
+            
+            try:
+                page.wait_for_selector("#landingImage", timeout=10000) 
+                img_locator = page.locator("#landingImage")
+                if img_locator.count() > 0:
+                    image_url = img_locator.get_attribute("src")
+                    print("✅ Product ki Image URL mil gayi.")
+            except Exception:
+                print("⚠️ Image load hone mein time lag gaya ya image nahi mili.")
 
-            description = ""
-            bullets_locator = page.locator("#feature-bullets li")
-            if bullets_locator.count() > 0:
-                description = " ".join(bullets_locator.all_inner_texts()).replace('\n', ' ')
+            try:
+                page.wait_for_selector("#feature-bullets li", timeout=10000) 
+                bullets_locator = page.locator("#feature-bullets li")
+                if bullets_locator.count() > 0:
+                    description = " ".join(bullets_locator.all_inner_texts()).replace('\n', ' ')
+                    print("✅ Product ka Description mil gaya.")
+            except Exception:
+                print("⚠️ Description load hone mein time lag gaya.")
 
         except Exception as e:
             print(f"Scraping failed inside browser. Error: {e}")
@@ -229,7 +252,7 @@ def process_and_post():
             image_downloaded = True
 
     # --- CATBOX UPLOAD ---
-    final_image_link = image_url  # Agar upload fail ho to default amazon link rahega
+    final_image_link = image_url  
     if image_downloaded:
         print("🚀 Image Catbox par upload kar rahe hain...")
         catbox_link = upload_to_catbox(TEMP_IMAGE_FILE, retries=10)
@@ -270,10 +293,9 @@ def process_and_post():
             "description": short_description,
             "affiliate_link": affiliate_link,
             "tags": final_tags,
-            "image_url": final_image_link  # Yahan ab Catbox ka link jaayega
+            "image_url": final_image_link  
         }
         
-        # Webhook par bhi image file aur Catbox ka url dono send honge (jaisa aapka code pehle kar raha tha)
         if image_downloaded:
             with open(TEMP_IMAGE_FILE, 'rb') as image_file:
                 w_res = requests.post(WEBHOOK_URL, data=webhook_data, files={"image": image_file})
@@ -290,7 +312,7 @@ def process_and_post():
     save_history(history)
     print("✅ History update ho gayi! Ab yeh link 7 din baad hi repeat hoga.")
     
-    # --- CLEANUP (Ab temp image delete ho jayegi kyunki folder mein save nahi karna) ---
+    # --- CLEANUP ---
     if os.path.exists(TEMP_IMAGE_FILE):
         os.remove(TEMP_IMAGE_FILE)
         print("🗑️ Temp image delete kar di gayi.")
