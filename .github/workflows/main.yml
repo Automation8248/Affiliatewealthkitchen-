@@ -2,8 +2,10 @@ name: Affiliate Auto Poster
 
 on:
   schedule:
-    - cron: '0 */4 * * *' # Har 4 ghante mein run hoga, aap ise change kar sakte hain
-  workflow_dispatch: # Manual run ke liye button dega
+    # India Time: 08:30 PM (Daily Ek Baar)
+    # US Time (EST): 11:00 AM (Morning/Lunch Peak)
+    - cron: '00 15 * * *' 
+  workflow_dispatch: # Manual run ke liye button
 
 jobs:
   scrape-and-post:
