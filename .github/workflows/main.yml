@@ -3,7 +3,7 @@ name: Affiliate Auto Poster
 on:
   schedule:
     # India Time: 08:30 PM (Daily Ek Baar)
-    # US Time (EST): 11:00 AM (Morning/Lunch Peak)
+    # US Time (EST): 11:00 AM (Morning/Lunch Peak Shopping Time)
     - cron: '00 15 * * *' 
   workflow_dispatch: # Manual run ke liye button
 
@@ -22,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install requests beautifulsoup4 playwright
           playwright install chromium
 
       - name: Run Scraper Script
@@ -45,7 +45,18 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add history.json
-          git add images/  # <--- YAHAN NAYA LOGIC ADD KIYA HAI
-          git commit -m "Update history and saved image" || echo "No changes to commit"
-          git push
+          
+          # History file add karein
+          git add history.json || true
+          
+          # Smart Check: Agar images folder hai tabhi add karein taaki crash na ho
+          if [ -d "images" ]; then
+            git add images/
+            echo "✅ Images folder found and added to commit."
+          else
+            echo "⚠️ Images folder not found, skipping."
+          fi
+          
+          # Commit aur Push logic
+          git commit -m "Update history and saved image [skip ci]" || echo "No changes to commit"
+          git push || echo "No changes to push"
