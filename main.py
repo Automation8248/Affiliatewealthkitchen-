@@ -14,6 +14,16 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 COOLDOWN_DAYS = 5
 HISTORY_FILE = "history.json"
 LINKS_FILE = "links.txt"
+TEMP_IMAGE_FILE = "temp_image.jpg" # Image download karne ke liye temporary file
+
+# --- UNIVERSAL KITCHEN TITLES ---
+KITCHEN_TITLES = [
+    "Upgrade Your Kitchen with This Smart Gadget! 🍳",
+    "A Must-Have Essential for Every Modern Kitchen! ✨",
+    "Make Cooking Easier and Faster Today! 👩‍🍳",
+    "The Secret to a Perfectly Organized Kitchen! 🏠",
+    "Say Goodbye to Kitchen Mess with This Handy Tool! 🧼"
+]
 
 # --- 50+ RANDOM USER AGENTS ---
 USER_AGENTS = [
@@ -119,28 +129,6 @@ def get_available_link():
 
     return random.choice(available_links), history
 
-def shorten_title_with_pollinations(long_title):
-    """ Pollinations AI ka use karke Amazon title ko short aur catchy banana. """
-    print("AI se title short kar rahe hain...")
-    prompt = f"Rewrite this Amazon product title to be catchy and short for a Pinterest pin (maximum 5 to 8 words). Just give the title, no quotes, no extra text: {long_title}"
-    
-    try:
-        # Pollinations Text API par POST request
-        response = requests.post("https://text.pollinations.ai/", data=prompt.encode('utf-8'), headers={'Content-Type': 'text/plain'})
-        if response.status_code == 200:
-            short_title = response.text.strip()
-            # Agar AI quotes laga de toh usko hatana
-            if short_title.startswith('"') and short_title.endswith('"'):
-                short_title = short_title[1:-1]
-            print(f"AI Shortened Title: {short_title}")
-            return short_title
-        else:
-            print("AI failed, fallback to original short.")
-            return long_title[:60] + "..."
-    except Exception as e:
-        print(f"Pollinations AI Error: {e}")
-        return long_title[:60] + "..."
-
 def process_and_post():
     result = get_available_link()
     if not result:
@@ -155,11 +143,10 @@ def process_and_post():
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Referer": "https://www.google.com/" # Google ka referer dene se Amazon ko lagta hai user search karke aaya hai
+        "Referer": "https://www.google.com/" 
     }
     
     try:
-        # Session ka use karna normal requests se zyada safe hota hai
         session = requests.Session()
         response = session.get(affiliate_link, headers=headers, allow_redirects=True, timeout=15)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -170,14 +157,26 @@ def process_and_post():
         if title_element is None:
             print("❌ Scraping failed! Amazon ne asli page ki jagah CAPTCHA de diya hai.")
             print("Action: Yeh link skip kar rahe hain, code crash nahi hoga. Next time retry hoga.")
-            return # Script yahin ruk jayegi aur crash nahi hogi
+            return
             
-        raw_title = title_element.get_text(strip=True)
-        
         # Image extract karna
         image_element = soup.find("img", {"id": "landingImage"})
         image_url = image_element['src'] if image_element else ""
         
+        # Image Download Logic
+        image_downloaded = False
+        if image_url:
+            print(f"Downloading image from: {image_url}")
+            img_response = requests.get(image_url, stream=True)
+            if img_response.status_code == 200:
+                with open(TEMP_IMAGE_FILE, 'wb') as f:
+                    for chunk in img_response.iter_content(1024):
+                        f.write(chunk)
+                image_downloaded = True
+                print("✅ Image successfully downloaded.")
+            else:
+                print("❌ Failed to download image.")
+
         # Description extract karna
         bullets = soup.find("div", {"id": "feature-bullets"})
         description = ""
@@ -185,33 +184,55 @@ def process_and_post():
             list_items = bullets.find_all("li")
             description = " ".join([li.get_text(strip=True) for li in list_items])
             
-        # AI Title
-        final_title = shorten_title_with_pollinations(raw_title)
+        # 300 Character Description Logic
+        if len(description) > 300:
+            short_description = description[:297] + "..."
+        else:
+            short_description = description
+
+        # Random Title Logic
+        final_title = random.choice(KITCHEN_TITLES)
 
     except Exception as e:
         print(f"Scraping request failed. Error: {e}")
         return
 
-    # 1. Telegram par bhejna
+    # 1. Telegram par bhejna (Photo File ke sath)
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-        telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
-        caption = f"🔥 **{final_title}**\n\n✨ \n\n🛒 **Buy Here:** {affiliate_link}"
-        payload = {"chat_id": TELEGRAM_CHAT_ID, "photo": image_url, "caption": caption, "parse_mode": "Markdown"}
-        t_res = requests.post(telegram_api_url, data=payload)
+        caption = f"🔥 **{final_title}**\n\n✨ {short_description}\n\n🛒 **Buy Here:** {affiliate_link}"
+        
+        if image_downloaded:
+            telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+            with open(TEMP_IMAGE_FILE, 'rb') as photo:
+                payload = {"chat_id": TELEGRAM_CHAT_ID, "caption": caption, "parse_mode": "Markdown"}
+                files = {"photo": photo}
+                t_res = requests.post(telegram_api_url, data=payload, files=files)
+        else:
+            # Agar image download nahi hui to sirf text bhej do
+            telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+            payload = {"chat_id": TELEGRAM_CHAT_ID, "text": caption, "parse_mode": "Markdown"}
+            t_res = requests.post(telegram_api_url, data=payload)
+            
         if t_res.status_code == 200:
             print("✅ Telegram par message chala gaya!")
         else:
             print(f"❌ Telegram Error: {t_res.text}")
 
-    # 2. Webhook par bhejna
+    # 2. Webhook par bhejna (File form-data ke roop me)
     if WEBHOOK_URL:
-        webhook_payload = {
+        webhook_data = {
             "title": final_title,
-            "description": description[:300],
-            "image_url": image_url,
+            "description": short_description,
             "affiliate_link": affiliate_link
         }
-        w_res = requests.post(WEBHOOK_URL, json=webhook_payload)
+        
+        if image_downloaded:
+            with open(TEMP_IMAGE_FILE, 'rb') as image_file:
+                files = {"image": image_file} # "image" key se file jayegi
+                w_res = requests.post(WEBHOOK_URL, data=webhook_data, files=files)
+        else:
+            w_res = requests.post(WEBHOOK_URL, data=webhook_data)
+            
         if w_res.status_code == 200:
             print("✅ Webhook par data chala gaya!")
         else:
@@ -221,6 +242,11 @@ def process_and_post():
     history[affiliate_link] = datetime.now().isoformat()
     save_history(history)
     print("✅ History update ho gayi!")
+    
+    # 4. Clean Up Temporary Image
+    if os.path.exists(TEMP_IMAGE_FILE):
+        os.remove(TEMP_IMAGE_FILE)
+        print("🧹 Temporary image deleted.")
 
 if __name__ == "__main__":
     process_and_post()
