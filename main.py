@@ -18,65 +18,20 @@ HISTORY_FILE = "history.json"
 LINKS_FILE = "links.txt"
 TITLES_FILE = "titles.txt"
 TAGS_FILE = "tags.txt"
-
-# Ab folder nahi banega, sirf temporary file banegi jo baad mein delete ho jayegi
 TEMP_IMAGE_FILE = "temp_image.jpg"
 
-# --- 50+ RANDOM USER AGENTS (PURI LIST) ---
+# --- AAPKI PROXY DETAILS ---
+# Format: http://username:password@ip:port
+MY_PROXY = "http://oxulhyvs:ukzzq3m862fa@31.59.20.176:6754/"
+
+# --- 50+ RANDOM USER AGENTS ---
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Safari/605.1.15",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 OPR/108.0.0.0",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (iPad; CPU OS 17_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (Linux; Android 14; SM-S928U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
-    "Mozilla/5.0 (Windows NT 10.0; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Vivaldi/6.6.3271.45",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0",
-    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.1 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 12; SM-A515F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 11; SM-T500) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 13; Pixel 6a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 ]
 
-# --- CATBOX.MOE UPLOAD FUNCTION (10 TRIES LOGIC) ---
+# --- CATBOX UPLOAD (10 TRIES) ---
 def upload_to_catbox(file_path, retries=10):
     url = "https://catbox.moe/user/api.php"
     for i in range(retries):
@@ -84,258 +39,112 @@ def upload_to_catbox(file_path, retries=10):
             with open(file_path, 'rb') as f:
                 data = {'reqtype': 'fileupload'}
                 files = {'fileToUpload': f}
-                print(f"🔄 Catbox upload try {i+1}/{retries}...")
                 response = requests.post(url, data=data, files=files, timeout=30)
-                
                 if response.status_code == 200 and "catbox.moe" in response.text:
                     return response.text.strip()
-        except Exception as e:
-            print(f"⚠️ Catbox upload fail hua (Try {i+1}): {e}")
-            
-        time.sleep(2) # 2 second wait karega agle try se pehle
+        except: pass
+        time.sleep(2)
     return None
 
 def load_history():
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r") as f:
-            try:
-                data = json.load(f)
-                return data if isinstance(data, dict) else {}
-            except json.JSONDecodeError:
-                return {}
+            try: return json.load(f)
+            except: return {}
     return {}
 
 def save_history(history):
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=4)
+    with open(HISTORY_FILE, "w") as f: json.dump(history, f, indent=4)
 
 def get_available_link():
-    if not os.path.exists(LINKS_FILE):
-        print(f"Error: {LINKS_FILE} nahi mili.")
-        return None
-        
+    if not os.path.exists(LINKS_FILE): return None
     with open(LINKS_FILE, "r") as f:
-        all_links = [line.strip() for line in f.readlines() if line.strip()]
-
-    if not all_links:
-        print("Error: links.txt file khali hai.")
-        return None
-
+        all_links = [l.strip() for l in f.readlines() if l.strip()]
     history = load_history()
     now = datetime.now()
-    available_links = []
-
-    for link in all_links:
-        if link in history:
-            last_used_str = history[link]
-            last_used_date = datetime.fromisoformat(last_used_str)
-            if now - last_used_date >= timedelta(days=COOLDOWN_DAYS):
-                available_links.append(link)
-        else:
-            available_links.append(link)
-
-    if not available_links:
-        print(f"Sabhi links {COOLDOWN_DAYS} din ke cooldown par hain.")
-        return None
-
-    return random.choice(available_links), history
+    available = [l for l in all_links if l not in history or (now - datetime.fromisoformat(history[l]) >= timedelta(days=COOLDOWN_DAYS))]
+    return (random.choice(available), history) if available else None
 
 def get_random_title():
-    if not os.path.exists(TITLES_FILE):
-        return "Check Out This Awesome Product! 🔥" 
     with open(TITLES_FILE, "r", encoding="utf-8") as f:
-        titles = [line.strip() for line in f.readlines() if line.strip()]
-    return random.choice(titles) if titles else "Check Out This Awesome Product! 🔥"
+        titles = [l.strip() for l in f.readlines() if l.strip()]
+    return random.choice(titles) if titles else "Awesome Find! 🔥"
 
-def get_random_tags(count=9):
-    if not os.path.exists(TAGS_FILE):
-        return "" 
+def get_random_tags():
     with open(TAGS_FILE, "r", encoding="utf-8") as f:
-        tags = [line.strip().replace("#", "") for line in f.readlines() if line.strip()]
-    if not tags: return ""
-    selected_tags = random.sample(tags, min(count, len(tags)))
-    return " ".join([f"#{tag}" for tag in selected_tags])
+        tags = [l.strip().replace("#", "") for l in f.readlines() if l.strip()]
+    return " ".join([f"#{t}" for t in random.sample(tags, min(9, len(tags)))]) if tags else ""
 
 def process_and_post():
     result = get_available_link()
-    if not result:
-        return
-
-    affiliate_link, history = result
-    print(f"Processing Link: {affiliate_link}")
-    random_user_agent = random.choice(USER_AGENTS)
+    if not result: return
+    link, history = result
     
-    # Global variables for try/except block
     image_url = ""
     description = ""
     
-    # --- START REAL BROWSER (PLAYWRIGHT) ---
     with sync_playwright() as p:
-        print("Asli browser open kar rahe hain...")
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent=random_user_agent,
-            viewport={'width': 1920, 'height': 1080}
-        )
+        # Aapki Proxy yahan use ho rahi hai
+        browser = p.chromium.launch(headless=True, proxy={"server": MY_PROXY})
+        context = browser.new_context(user_agent=random.choice(USER_AGENTS))
         page = context.new_page()
         
         try:
-            page.goto(affiliate_link, timeout=45000)
+            page.goto(link, timeout=60000)
             
-            # --- 0. NEW ANTI-BOT LOGIC: HUMAN MOUSE CLICK ON "Continue shopping" ---
-            try:
-                # Check karega ki "Continue shopping" ka button screen par hai ya nahi
-                continue_btn = page.locator("text=/Continue shopping/i")
-                if continue_btn.count() > 0:
-                    print("⚠️ 'Continue shopping' ka bot-check page detect hua. Human ki tarah mouse se click kar rahe hain...")
-                    
-                    # 1. Mouse ko button ke theek upar le jana (Hover)
-                    continue_btn.first.hover()
-                    time.sleep(random.uniform(1.0, 2.0)) # Thoda rukega padhne jaisa
-                    
-                    # 2. Insaan jaisa natural delay ke sath button dabana
-                    continue_btn.first.click(delay=random.randint(150, 400)) 
-                    
-                    # 3. Click hone ke baad naya page aane ka theek se wait karna
-                    print("✅ Click kar diya, naye page ka wait kar rahe hain...")
-                    time.sleep(random.uniform(5.0, 7.0)) 
-            except Exception as e:
-                pass # Agar button nahi mila toh error nahi aayega, sidha aage badhega
+            # 1. CONTINUE SHOPPING BYPASS (HUMAN CLICK)
+            continue_btn = page.locator("text=/Continue shopping/i")
+            if continue_btn.count() > 0:
+                continue_btn.first.hover()
+                time.sleep(2)
+                continue_btn.first.click(delay=random.randint(200, 500))
+                time.sleep(6)
             
-            # --- 1. HUMAN BEHAVIOR: 5 SE 7 SECOND WAIT ---
-            print("Main page par pohoch gaye, insaan ki tarah 5 se 7 second ruk rahe hain...")
-            time.sleep(random.uniform(5.0, 7.0)) 
+            # 2. HUMAN WAIT & SCROLL
+            time.sleep(random.uniform(5, 7))
+            page.mouse.wheel(0, 800)
+            time.sleep(3)
+            page.mouse.wheel(0, -400)
             
-            page.screenshot(path="screenshot_1_loaded.png")
-            print("📸 Screenshot liya: Page Load.")
-
-            # Mouse hilaana kahin aur random jagah pe
-            page.mouse.move(random.randint(100, 500), random.randint(100, 500))
-            time.sleep(random.uniform(0.5, 1.5))
-            
-            # --- 2. HUMAN BEHAVIOR: NICHE AUR UPAR SCROLL KAREGA ---
-            print("Niche scroll kar rahe hain...")
-            page.mouse.wheel(0, random.randint(600, 1000)) # Niche ki taraf
-            time.sleep(random.uniform(2.0, 3.0))
-            
-            print("Wapas upar scroll kar rahe hain...")
-            page.mouse.wheel(0, -random.randint(300, 600)) # Upar ki taraf
-            time.sleep(random.uniform(1.0, 2.0))
-            
-            page.screenshot(path="screenshot_2_scrolled.png")
-            print("📸 Screenshot liya: Scroll karne ke baad.")
-
-            if page.locator("#captchacharacters").count() > 0:
-                print("❌ Amazon ne abhi bhi CAPTCHA de diya (IP block).")
-                page.screenshot(path="screenshot_error_captcha.png")
-                browser.close()
-                return
-            
-            # --- EXTRACT DATA (IMAGE AUR DESCRIPTION) ---
-            print("🔍 Image aur Description dhoondh rahe hain...")
-            
-            try:
-                page.wait_for_selector("#landingImage", timeout=10000) 
-                img_locator = page.locator("#landingImage")
-                if img_locator.count() > 0:
-                    image_url = img_locator.get_attribute("src")
-                    print("✅ Product ki Image URL mil gayi.")
-            except Exception:
-                print("⚠️ Image load hone mein time lag gaya ya image nahi mili.")
-
-            try:
-                page.wait_for_selector("#feature-bullets li", timeout=10000) 
-                bullets_locator = page.locator("#feature-bullets li")
-                if bullets_locator.count() > 0:
-                    description = " ".join(bullets_locator.all_inner_texts()).replace('\n', ' ')
-                    print("✅ Product ka Description mil gaya.")
-            except Exception:
-                print("⚠️ Description load hone mein time lag gaya.")
+            # 3. EXTRACT
+            page.wait_for_selector("#landingImage", timeout=15000)
+            image_url = page.locator("#landingImage").get_attribute("src")
+            description = " ".join(page.locator("#feature-bullets li").all_inner_texts())
 
         except Exception as e:
-            print(f"Scraping failed inside browser. Error: {e}")
-            page.screenshot(path="screenshot_crash.png")
+            print(f"Browser Error: {e}")
             browser.close()
             return
-
         browser.close()
-        print("Browser band kar diya. Data mil gaya.")
 
-    # --- IMAGE DOWNLOAD ---
+    # DOWNLOAD & POST
     image_downloaded = False
     if image_url:
-        img_response = requests.get(image_url, stream=True)
-        if img_response.status_code == 200:
-            with open(TEMP_IMAGE_FILE, 'wb') as f:
-                for chunk in img_response.iter_content(1024):
-                    f.write(chunk)
+        img_res = requests.get(image_url)
+        if img_res.status_code == 200:
+            with open(TEMP_IMAGE_FILE, 'wb') as f: f.write(img_res.content)
             image_downloaded = True
 
-    # --- CATBOX UPLOAD ---
-    final_image_link = image_url  
-    if image_downloaded:
-        print("🚀 Image Catbox par upload kar rahe hain...")
-        catbox_link = upload_to_catbox(TEMP_IMAGE_FILE, retries=10)
-        if catbox_link:
-            print(f"✅ Catbox Upload Success: {catbox_link}")
-            final_image_link = catbox_link
-        else:
-            print("❌ Catbox Upload 10 baar try karne par bhi fail ho gaya.")
-
-    # 300 Chars Limit Description
-    short_description = description[:297] + "..." if len(description) > 300 else description
+    # CATBOX & FILES
+    catbox_link = upload_to_catbox(TEMP_IMAGE_FILE) if image_downloaded else image_url
     final_title = get_random_title()
-    final_tags = get_random_tags(count=9)
+    final_tags = get_random_tags()
 
-    # --- 1. TELEGRAM POST (ONLY IMAGE, TITLE, LINK) ---
+    # POSTING
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-        telegram_caption = f"🔥 **{final_title}**\n\n🛒 **Buy Here:** {affiliate_link}"
-        
-        if image_downloaded:
-            t_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
-            with open(TEMP_IMAGE_FILE, 'rb') as photo:
-                payload = {"chat_id": TELEGRAM_CHAT_ID, "caption": telegram_caption, "parse_mode": "Markdown"}
-                t_res = requests.post(t_url, data=payload, files={"photo": photo})
-        else:
-            t_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-            payload = {"chat_id": TELEGRAM_CHAT_ID, "text": telegram_caption, "parse_mode": "Markdown"}
-            t_res = requests.post(t_url, data=payload)
-            
-        if t_res.status_code == 200:
-            print("✅ Telegram par message gaya!")
-        else:
-            print(f"❌ Telegram Error: {t_res.text}")
+        requests.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto", 
+                      data={"chat_id": TELEGRAM_CHAT_ID, "caption": f"**{final_title}**\n\n{link}", "parse_mode": "Markdown"},
+                      files={"photo": open(TEMP_IMAGE_FILE, 'rb')} if image_downloaded else None)
 
-    # --- 2. WEBHOOK POST (CATBOX LINK BHEJEGA) ---
     if WEBHOOK_URL:
-        webhook_data = {
-            "title": final_title,
-            "description": short_description,
-            "affiliate_link": affiliate_link,
-            "tags": final_tags,
-            "image_url": final_image_link  
-        }
-        
-        if image_downloaded:
-            with open(TEMP_IMAGE_FILE, 'rb') as image_file:
-                w_res = requests.post(WEBHOOK_URL, data=webhook_data, files={"image": image_file})
-        else:
-            w_res = requests.post(WEBHOOK_URL, data=webhook_data)
-            
-        if w_res.status_code == 200:
-            print("✅ Webhook par data gaya!")
-        else:
-            print(f"❌ Webhook Error: {w_res.status_code}")
+        requests.post(WEBHOOK_URL, json={
+            "title": final_title, "description": description[:290]+"...", 
+            "affiliate_link": link, "tags": final_tags, "image_url": catbox_link
+        })
 
-    # --- HISTORY UPDATE ---
-    history[affiliate_link] = datetime.now().isoformat()
+    history[link] = datetime.now().isoformat()
     save_history(history)
-    print("✅ History update ho gayi! Ab yeh link 7 din baad hi repeat hoga.")
-    
-    # --- CLEANUP ---
-    if os.path.exists(TEMP_IMAGE_FILE):
-        os.remove(TEMP_IMAGE_FILE)
-        print("🗑️ Temp image delete kar di gayi.")
+    if os.path.exists(TEMP_IMAGE_FILE): os.remove(TEMP_IMAGE_FILE)
 
 if __name__ == "__main__":
     process_and_post()
