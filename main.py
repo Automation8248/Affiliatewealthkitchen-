@@ -182,25 +182,34 @@ def process_and_post():
         try:
             page.goto(affiliate_link, timeout=45000)
             
-            # --- 0. NEW ANTI-BOT LOGIC: "Continue shopping" BUTTON CLICK ---
+            # --- 0. NEW ANTI-BOT LOGIC: HUMAN MOUSE CLICK ON "Continue shopping" ---
             try:
                 # Check karega ki "Continue shopping" ka button screen par hai ya nahi
                 continue_btn = page.locator("text=/Continue shopping/i")
                 if continue_btn.count() > 0:
-                    print("⚠️ 'Continue shopping' ka bot-check page detect hua. Button par click kar rahe hain...")
-                    continue_btn.first.click()
-                    time.sleep(4) # Click karne ke baad actual page load hone ka wait karega
-            except Exception:
-                pass # Agar button nahi mila, iska matlab direct page load ho gaya hai, aage badho
+                    print("⚠️ 'Continue shopping' ka bot-check page detect hua. Human ki tarah mouse se click kar rahe hain...")
+                    
+                    # 1. Mouse ko button ke theek upar le jana (Hover)
+                    continue_btn.first.hover()
+                    time.sleep(random.uniform(1.0, 2.0)) # Thoda rukega padhne jaisa
+                    
+                    # 2. Insaan jaisa natural delay ke sath button dabana
+                    continue_btn.first.click(delay=random.randint(150, 400)) 
+                    
+                    # 3. Click hone ke baad naya page aane ka theek se wait karna
+                    print("✅ Click kar diya, naye page ka wait kar rahe hain...")
+                    time.sleep(random.uniform(5.0, 7.0)) 
+            except Exception as e:
+                pass # Agar button nahi mila toh error nahi aayega, sidha aage badhega
             
             # --- 1. HUMAN BEHAVIOR: 5 SE 7 SECOND WAIT ---
-            print("Page par pohoch gaye, insaan ki tarah 5 se 7 second wait kar rahe hain...")
+            print("Main page par pohoch gaye, insaan ki tarah 5 se 7 second ruk rahe hain...")
             time.sleep(random.uniform(5.0, 7.0)) 
             
             page.screenshot(path="screenshot_1_loaded.png")
             print("📸 Screenshot liya: Page Load.")
 
-            # Mouse hilaana
+            # Mouse hilaana kahin aur random jagah pe
             page.mouse.move(random.randint(100, 500), random.randint(100, 500))
             time.sleep(random.uniform(0.5, 1.5))
             
@@ -210,7 +219,7 @@ def process_and_post():
             time.sleep(random.uniform(2.0, 3.0))
             
             print("Wapas upar scroll kar rahe hain...")
-            page.mouse.wheel(0, -random.randint(300, 600)) # Upar ki taraf (negative value)
+            page.mouse.wheel(0, -random.randint(300, 600)) # Upar ki taraf
             time.sleep(random.uniform(1.0, 2.0))
             
             page.screenshot(path="screenshot_2_scrolled.png")
