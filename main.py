@@ -20,10 +20,7 @@ TITLES_FILE = "titles.txt"
 TAGS_FILE = "tags.txt"
 TEMP_IMAGE_FILE = "temp_image.jpg"
 
-# --- AAPKI PROXY DETAILS ---
-MY_PROXY = "http://oxulhyvs:ukzzq3m862fa@31.59.20.176:6754/"
-
-# --- 50+ RANDOM USER AGENTS ---
+# --- 50+ RANDOM USER AGENTS (PURI LIST SAFE HAI) ---
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -85,10 +82,12 @@ def upload_to_catbox(file_path, retries=10):
             with open(file_path, 'rb') as f:
                 data = {'reqtype': 'fileupload'}
                 files = {'fileToUpload': f}
+                print(f"🔄 Catbox upload try {i+1}/{retries}...")
                 response = requests.post(url, data=data, files=files, timeout=30)
                 if response.status_code == 200 and "catbox.moe" in response.text:
                     return response.text.strip()
-        except: pass
+        except Exception as e:
+            print(f"⚠️ Catbox upload fail hua (Try {i+1}): {e}")
         time.sleep(2)
     return None
 
@@ -132,84 +131,134 @@ def process_and_post():
     description = ""
     
     with sync_playwright() as p:
-        # --- NAYA FAIL-SAFE LOGIC (PROXY RETRY) ---
-        for attempt in range(2): 
-            use_proxy = (attempt == 0) # Pehli baar True, Doosri baar False
+        # Proxy Hata Di Gayi Hai
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(user_agent=random.choice(USER_AGENTS))
+        page = context.new_page()
+        
+        try:
+            print(f"Processing Link: {link}")
+            # domcontentloaded se page bahut fast load hoga
+            page.goto(link, timeout=50000, wait_until="domcontentloaded")
             
-            if use_proxy:
-                print("🌐 Proxy ke saath try kar rahe hain...")
-                proxy_settings = {"server": MY_PROXY}
-            else:
-                print("🔄 Proxy slow thi! Ab bina proxy ke direct try kar rahe hain...")
-                proxy_settings = None
-
+            # --- 1. SMART ANTI-BOT LOGIC (MIND SET FOR "CONTINUE SHOPPING") ---
             try:
-                browser = p.chromium.launch(headless=True, proxy=proxy_settings)
-                context = browser.new_context(user_agent=random.choice(USER_AGENTS))
-                page = context.new_page()
-                
-                # NAYA FIX: 'domcontentloaded' se page bahut jaldi load hoga
-                page.goto(link, timeout=50000, wait_until="domcontentloaded")
-                
-                # 1. CONTINUE SHOPPING BYPASS (HUMAN CLICK)
+                # Ye bot ka 'mind' hai: Chahe interface kaisa bhi ho, ye text dhundhega
                 continue_btn = page.locator("text=/Continue shopping/i")
-                if continue_btn.count() > 0:
+                
+                # Agar button screen par mojud hai toh human click karega
+                if continue_btn.count() > 0 and continue_btn.first.is_visible():
+                    print("⚠️ 'Continue shopping' ka bot-check page detect hua! Button par click kar rahe hain...")
                     continue_btn.first.hover()
-                    time.sleep(2)
+                    time.sleep(random.uniform(1.0, 2.0))
                     continue_btn.first.click(delay=random.randint(200, 500))
-                    time.sleep(6)
-                
-                # 2. HUMAN WAIT & SCROLL
-                time.sleep(random.uniform(5, 7))
-                page.mouse.wheel(0, 800)
-                time.sleep(3)
-                page.mouse.wheel(0, -400)
-                
-                # 3. EXTRACT
+                    
+                    # Naya page load hone ka theek se wait karega
+                    print("✅ Click kar diya, main page ka wait kar rahe hain...")
+                    time.sleep(random.uniform(5.0, 7.0))
+            except Exception:
+                pass # Button nahi mila toh sidha aage badhega
+            
+            # --- 2. HUMAN BEHAVIOR: WAIT & SCROLL ---
+            print("Main page par pohoch gaye, insaan ki tarah ruk rahe hain...")
+            time.sleep(random.uniform(5.0, 7.0))
+            
+            page.screenshot(path="screenshot_1_loaded.png")
+            print("📸 Screenshot liya: Page Load.")
+
+            print("Niche aur upar scroll kar rahe hain...")
+            page.mouse.wheel(0, random.randint(600, 1000))
+            time.sleep(random.uniform(2.0, 3.0))
+            page.mouse.wheel(0, -random.randint(300, 600))
+            
+            page.screenshot(path="screenshot_2_scrolled.png")
+            
+            # --- 3. EXTRACT IMAGE AND DESCRIPTION ---
+            print("🔍 Image aur Description dhoondh rahe hain...")
+            try:
                 page.wait_for_selector("#landingImage", timeout=15000)
                 image_url = page.locator("#landingImage").get_attribute("src")
-                description = " ".join(page.locator("#feature-bullets li").all_inner_texts())
+                print("✅ Product ki Image URL mil gayi.")
+            except Exception:
+                print("⚠️ Image nahi mili.")
 
-                browser.close()
-                break # Agar success ho gaya, toh loop se bahar aa jao!
+            try:
+                page.wait_for_selector("#feature-bullets li", timeout=15000)
+                description = " ".join(page.locator("#feature-bullets li").all_inner_texts()).replace('\n', ' ')
+                print("✅ Product ka Description mil gaya.")
+            except Exception:
+                print("⚠️ Description nahi mila.")
 
-            except Exception as e:
-                print(f"⚠️ Error in attempt {attempt + 1}: {e}")
-                try: browser.close()
-                except: pass
-                
-                if not use_proxy:
-                    print("❌ Dono attempts fail ho gaye. Script ruk rahi hai.")
-                    return
+        except Exception as e:
+            print(f"Browser Error: {e}")
+            page.screenshot(path="screenshot_crash.png")
+            browser.close()
+            return
+            
+        browser.close()
+        print("Browser band kar diya. Data extraction complete.")
 
-    # DOWNLOAD & POST
+    # --- IMAGE DOWNLOAD ---
     image_downloaded = False
     if image_url:
-        img_res = requests.get(image_url)
+        img_res = requests.get(image_url, stream=True)
         if img_res.status_code == 200:
-            with open(TEMP_IMAGE_FILE, 'wb') as f: f.write(img_res.content)
+            with open(TEMP_IMAGE_FILE, 'wb') as f:
+                for chunk in img_res.iter_content(1024):
+                    f.write(chunk)
             image_downloaded = True
 
-    # CATBOX & FILES
-    catbox_link = upload_to_catbox(TEMP_IMAGE_FILE) if image_downloaded else image_url
+    # --- CATBOX UPLOAD ---
+    final_image_link = image_url  
+    if image_downloaded:
+        print("🚀 Image Catbox par upload kar rahe hain...")
+        catbox_link = upload_to_catbox(TEMP_IMAGE_FILE, retries=10)
+        if catbox_link:
+            print(f"✅ Catbox Upload Success: {catbox_link}")
+            final_image_link = catbox_link
+        else:
+            print("❌ Catbox Upload fail ho gaya.")
+
+    # --- PREPARE FINAL DATA ---
+    short_description = description[:290] + "..." if len(description) > 290 else description
     final_title = get_random_title()
     final_tags = get_random_tags()
 
-    # POSTING
+    # --- 1. TELEGRAM POST ---
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-        requests.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto", 
-                      data={"chat_id": TELEGRAM_CHAT_ID, "caption": f"**{final_title}**\n\n{link}", "parse_mode": "Markdown"},
-                      files={"photo": open(TEMP_IMAGE_FILE, 'rb')} if image_downloaded else None)
+        telegram_caption = f"🔥 **{final_title}**\n\n🛒 **Buy Here:** {link}"
+        if image_downloaded:
+            t_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+            with open(TEMP_IMAGE_FILE, 'rb') as photo:
+                requests.post(t_url, data={"chat_id": TELEGRAM_CHAT_ID, "caption": telegram_caption, "parse_mode": "Markdown"}, files={"photo": photo})
+        else:
+            t_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+            requests.post(t_url, data={"chat_id": TELEGRAM_CHAT_ID, "text": telegram_caption, "parse_mode": "Markdown"})
+        print("✅ Telegram process complete!")
 
+    # --- 2. WEBHOOK POST ---
     if WEBHOOK_URL:
-        requests.post(WEBHOOK_URL, json={
-            "title": final_title, "description": description[:290]+"...", 
-            "affiliate_link": link, "tags": final_tags, "image_url": catbox_link
-        })
+        webhook_data = {
+            "title": final_title,
+            "description": short_description,
+            "affiliate_link": link,
+            "tags": final_tags,
+            "image_url": final_image_link  
+        }
+        if image_downloaded:
+            with open(TEMP_IMAGE_FILE, 'rb') as image_file:
+                requests.post(WEBHOOK_URL, data=webhook_data, files={"image": image_file})
+        else:
+            requests.post(WEBHOOK_URL, data=webhook_data)
+        print("✅ Webhook process complete!")
 
+    # --- HISTORY UPDATE & CLEANUP ---
     history[link] = datetime.now().isoformat()
     save_history(history)
-    if os.path.exists(TEMP_IMAGE_FILE): os.remove(TEMP_IMAGE_FILE)
+    print("✅ History update ho gayi!")
+    
+    if os.path.exists(TEMP_IMAGE_FILE):
+        os.remove(TEMP_IMAGE_FILE)
 
 if __name__ == "__main__":
     process_and_post()
