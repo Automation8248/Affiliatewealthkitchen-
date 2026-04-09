@@ -13,14 +13,16 @@ WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
-COOLDOWN_DAYS = 7 
+# --- 15 DAYS COOLDOWN LOGIC ---
+COOLDOWN_DAYS = 15 
+
 HISTORY_FILE = "history.json"
 LINKS_FILE = "links.txt"
 TITLES_FILE = "titles.txt"
 TAGS_FILE = "tags.txt"
 TEMP_IMAGE_FILE = "temp_image.jpg"
 
-# --- 50+ RANDOM USER AGENTS ---
+# --- 50+ RANDOM USER AGENTS (Aapke original saare options wapas add kar diye hain) ---
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -102,14 +104,35 @@ def save_history(history):
     with open(HISTORY_FILE, "w") as f: json.dump(history, f, indent=4)
 
 def get_available_link():
-    if not os.path.exists(LINKS_FILE): return None
+    if not os.path.exists(LINKS_FILE): 
+        print("❌ links.txt file nahi mili!")
+        return None
+        
     with open(LINKS_FILE, "r") as f:
         all_links = [l.strip() for l in f.readlines() if l.strip()]
-    if not all_links: return None
+        
+    if not all_links: 
+        print("❌ links.txt khali hai!")
+        return None
     
     history = load_history()
-    available = [l for l in all_links if l not in history or (datetime.now() - datetime.fromisoformat(history[l]) >= timedelta(days=COOLDOWN_DAYS))]
-    return (random.choice(available), history) if available else None
+    available = []
+    
+    # LOGIC: Check agar link history me nahi hai OR 15 din cross ho chuke hain
+    for l in all_links:
+        if l not in history:
+            available.append(l)
+        else:
+            last_used_date = datetime.fromisoformat(history[l])
+            if datetime.now() - last_used_date >= timedelta(days=COOLDOWN_DAYS):
+                available.append(l)
+                
+    if available:
+        selected_link = random.choice(available)
+        return (selected_link, history)
+    else:
+        print(f"⚠️ Koi naya link available nahi hai. Saare links pichle {COOLDOWN_DAYS} din mein use ho chuke hain.")
+        return None
 
 def get_random_title():
     if not os.path.exists(TITLES_FILE): return "Find this Amazing Product! 🔥"
@@ -220,10 +243,10 @@ def process_and_post():
         else:
             print(f"❌ Webhook Error: {w_res.status_code}")
 
-    # History update for cooldown
+    # HISTORY UPDATE (15-day cooldown starts from now)
     history[link] = datetime.now().isoformat()
     save_history(history)
-    print("✅ History saved. (Cooldown starts)")
+    print("✅ History saved. (15-Day Cooldown starts for this link)")
     
     # Temp image file delete (CLEANUP)
     if os.path.exists(TEMP_IMAGE_FILE): os.remove(TEMP_IMAGE_FILE)
